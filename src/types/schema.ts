@@ -21,6 +21,7 @@ export interface Booking {
     start_time: string; // "HH:mm"
     end_time: string; // "HH:mm"
     timestamp: number;
+    instructor?: string; // Name or ID of the responsible instructor
 }
 
 export interface UserProfile {

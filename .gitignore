@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Data
+.p2p-test-data/
+.p2p-data/
+
+# Build
+dist-electron/

@@ -1,6 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useYjs } from '../context/YjsProvider';
-import type { Lab, Module } from '../types/schema';
+import { useYjs } from '../hooks/useYjs';
+import type { Lab, Module, Booking, UserProfile } from '../types/schema';
+
+export const useUsers = () => {
+    const { yDoc } = useYjs();
+    const [users, setUsers] = useState<UserProfile[]>([]);
+
+    useEffect(() => {
+        const usersMap = yDoc.getMap<UserProfile>('users');
+        const updateState = () => {
+            setUsers(Array.from(usersMap.values()));
+        };
+        updateState();
+        usersMap.observe(() => {
+            updateState();
+        });
+    }, [yDoc]);
+
+    return users;
+};
 
 export const useLabs = () => {
     const { yDoc } = useYjs();
@@ -48,4 +66,24 @@ export const useModules = () => {
     }, [yDoc]);
 
     return modules;
+};
+
+export const useBookings = () => {
+    const { yDoc } = useYjs();
+    const [bookings, setBookings] = useState<Booking[]>([]);
+
+    useEffect(() => {
+        const bookingsMap = yDoc.getMap<Booking>('bookings');
+
+        const updateState = () => {
+            setBookings(Array.from(bookingsMap.values()));
+        };
+
+        updateState();
+        bookingsMap.observe(() => {
+            updateState();
+        });
+    }, [yDoc]);
+
+    return bookings;
 };
