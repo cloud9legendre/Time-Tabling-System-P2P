@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useYjs } from '../hooks/useYjs';
-import type { Lab, Module, Booking, UserProfile, Instructor } from '../types/schema';
+import type { Lab, Module, Booking, UserProfile, Instructor, LeaveRequest } from '../types/schema';
 
 export const useUsers = () => {
     const { yDoc } = useYjs();
@@ -106,4 +106,24 @@ export const useInstructors = () => {
     }, [yDoc]);
 
     return instructors;
+};
+
+export const useLeaves = () => {
+    const { yDoc } = useYjs();
+    const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
+
+    useEffect(() => {
+        const leavesMap = yDoc.getMap<LeaveRequest>('leaves');
+
+        const updateState = () => {
+            setLeaves(Array.from(leavesMap.values()));
+        };
+
+        updateState();
+        leavesMap.observe(() => {
+            updateState();
+        });
+    }, [yDoc]);
+
+    return leaves;
 };

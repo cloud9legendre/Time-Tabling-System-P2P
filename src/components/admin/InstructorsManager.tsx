@@ -96,7 +96,6 @@ export const InstructorsManager: React.FC = () => {
                                 <h3 className="text-xl font-semibold text-green-400">{inst.name}</h3>
                                 <div className="text-sm text-gray-400 mt-1 font-mono">{inst.email}</div>
                                 <div className="text-xs text-gray-500 mt-1">ID: {inst.id}</div>
-                                <div className="text-xs text-gray-500 mt-1">ID: {inst.id}</div>
                             </div>
                         </div>
 

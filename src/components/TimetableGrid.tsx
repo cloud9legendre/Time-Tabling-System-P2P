@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useBookings } from '../hooks/useSharedState';
+import { useBookings, useLeaves } from '../hooks/useSharedState';
 import { BookingModal } from './BookingModal';
 import { useAuth } from '../hooks/useAuth';
 import { useYjs } from '../hooks/useYjs';
@@ -7,6 +7,7 @@ import type { Booking } from '../types/schema';
 
 export const TimetableGrid: React.FC = () => {
     const bookings = useBookings();
+    const leaves = useLeaves();
     const { isAdmin, user } = useAuth();
     const { yDoc } = useYjs();
 
@@ -162,38 +163,52 @@ export const TimetableGrid: React.FC = () => {
 
                                 {/* Bookings List - Scrollable if too many */}
                                 <div className="flex-1 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
-                                    {dayBookings.map(booking => (
-                                        <div key={booking.id} className="flex-none text-[10px] bg-[#333] hover:bg-[#3a3a3a] px-1.5 py-1 rounded border border-gray-700 hover:border-gray-500 transition-colors group/item relative shadow-sm">
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-bold text-blue-300 mr-1">{booking.start_time}</span>
-                                                <span className="truncate font-medium text-gray-300 flex-1">{booking.module_code}</span>
-                                                {isAdmin && (
-                                                    <div className="flex gap-1 ml-1 opacity-0 group-hover/item:opacity-100 transition-opacity flex-shrink-0">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleEdit(booking);
-                                                            }}
-                                                            className="text-yellow-400 hover:text-yellow-200"
-                                                            title="Edit"
-                                                        >
-                                                            ✎
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleDelete(booking.id);
-                                                            }}
-                                                            className="text-red-400 hover:text-red-200"
-                                                            title="Delete"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    </div>
-                                                )}
+                                    {dayBookings.map(booking => {
+                                        const isOnLeave = leaves.some(l =>
+                                            l.status === 'APPROVED' &&
+                                            l.instructorId === booking.instructor &&
+                                            dateStr >= l.startDate &&
+                                            dateStr <= l.endDate
+                                        );
+
+                                        return (
+                                            <div key={booking.id} className={`flex-none text-[10px] px-1.5 py-1 rounded border transition-colors group/item relative shadow-sm
+                                            ${isOnLeave
+                                                    ? 'bg-red-900/40 border-red-500 text-red-100 hover:bg-red-900/60'
+                                                    : 'bg-[#333] border-gray-700 text-gray-200 hover:bg-[#3a3a3a] hover:border-gray-500'
+                                                }
+                                        `}>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-bold text-blue-300 mr-1">{booking.start_time}</span>
+                                                    <span className="truncate font-medium text-gray-300 flex-1">{booking.module_code}</span>
+                                                    {isAdmin && (
+                                                        <div className="flex gap-1 ml-1 opacity-0 group-hover/item:opacity-100 transition-opacity flex-shrink-0">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleEdit(booking);
+                                                                }}
+                                                                className="text-yellow-400 hover:text-yellow-200"
+                                                                title="Edit"
+                                                            >
+                                                                ✎
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDelete(booking.id);
+                                                                }}
+                                                                className="text-red-400 hover:text-red-200"
+                                                                title="Delete"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
 
                                     {/* Hitbox filler */}
                                     <div className="flex-1 min-h-[10px]"></div>
@@ -210,6 +225,6 @@ export const TimetableGrid: React.FC = () => {
                 initialDate={selectedDate}
                 bookingToEdit={editingBooking}
             />
-        </div>
+        </div >
     );
 };

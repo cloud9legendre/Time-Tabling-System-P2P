@@ -3,11 +3,14 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Calendar, Settings, Shield, LogOut, KeyRound } from 'lucide-react';
 import { ChangePasswordModal } from './auth/ChangePasswordModal';
+import { LeaveRequestPanel } from './auth/LeaveRequestPanel';
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 export const NavBar: React.FC = () => {
     const { isAdmin, logout } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isLeavesOpen, setIsLeavesOpen] = useState(false);
 
     return (
         <nav className="bg-[#2a2a2a] border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-40 shadow-md">
@@ -53,13 +56,22 @@ export const NavBar: React.FC = () => {
                 </div>
 
                 {!isAdmin && (
-                    <button
-                        onClick={() => setIsPasswordModalOpen(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md transition-colors text-sm"
-                        title="Change Password"
-                    >
-                        <KeyRound size={16} /> Change Password
-                    </button>
+                    <>
+                        <button
+                            onClick={() => setIsLeavesOpen(true)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md transition-colors text-sm"
+                            title="My Leaves"
+                        >
+                            <Calendar size={16} /> My Leaves
+                        </button>
+                        <button
+                            onClick={() => setIsPasswordModalOpen(true)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md transition-colors text-sm"
+                            title="Change Password"
+                        >
+                            <KeyRound size={16} /> Change Password
+                        </button>
+                    </>
                 )}
 
                 <button
@@ -75,6 +87,22 @@ export const NavBar: React.FC = () => {
                 isOpen={isPasswordModalOpen}
                 onClose={() => setIsPasswordModalOpen(false)}
             />
+
+            {isLeavesOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-[#1a1a1a] w-full max-w-2xl rounded-xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <button
+                            onClick={() => setIsLeavesOpen(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
+                        >
+                            <X size={24} />
+                        </button>
+                        <div className="p-2">
+                            <LeaveRequestPanel />
+                        </div>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };

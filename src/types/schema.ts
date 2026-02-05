@@ -40,5 +40,16 @@ export interface UserProfile {
     role: 'ADMIN' | 'INSTRUCTOR';
 }
 
+export interface LeaveRequest {
+    id: string;
+    instructorId: string;
+    instructorName: string;
+    startDate: string; // "YYYY-MM-DD"
+    endDate: string;   // "YYYY-MM-DD"
+    reason: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    timestamp: number;
+}
+
 // Yjs Map keys
-export type SharedTypeKeys = 'labs' | 'modules' | 'bookings' | 'users' | 'instructors';
+export type SharedTypeKeys = 'labs' | 'modules' | 'bookings' | 'users' | 'instructors' | 'leaves';

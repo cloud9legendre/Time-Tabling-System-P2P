@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { LabsManager } from './LabsManager';
 import { ModulesManager } from './ModulesManager';
 import { InstructorsManager } from './InstructorsManager';
+import { LeaveRequestsManager } from './LeaveRequestsManager';
 import { useAuth } from '../../hooks/useAuth';
 import { ShieldAlert } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
     const { isAdmin, user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'labs' | 'modules' | 'instructors'>('labs');
+    const [activeTab, setActiveTab] = useState<'labs' | 'modules' | 'instructors' | 'leaves'>('labs');
 
     if (!isAdmin) {
         return (
@@ -33,8 +34,8 @@ export const AdminDashboard: React.FC = () => {
                 <button
                     onClick={() => setActiveTab('labs')}
                     className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'labs'
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 transform -translate-y-1'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 transform -translate-y-1'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
                         }`}
                 >
                     Manage Labs
@@ -42,8 +43,8 @@ export const AdminDashboard: React.FC = () => {
                 <button
                     onClick={() => setActiveTab('modules')}
                     className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'modules'
-                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50 transform -translate-y-1'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50 transform -translate-y-1'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
                         }`}
                 >
                     Manage Modules
@@ -51,11 +52,20 @@ export const AdminDashboard: React.FC = () => {
                 <button
                     onClick={() => setActiveTab('instructors')}
                     className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'instructors'
-                            ? 'bg-green-600 text-white shadow-lg shadow-green-900/50 transform -translate-y-1'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-green-600 text-white shadow-lg shadow-green-900/50 transform -translate-y-1'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
                         }`}
                 >
                     Manage Instructors
+                </button>
+                <button
+                    onClick={() => setActiveTab('leaves')}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'leaves'
+                        ? 'bg-yellow-600 text-white shadow-lg shadow-yellow-900/50 transform -translate-y-1'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        }`}
+                >
+                    Review Leaves
                 </button>
             </div>
 
@@ -64,6 +74,7 @@ export const AdminDashboard: React.FC = () => {
                 {activeTab === 'labs' && <LabsManager />}
                 {activeTab === 'modules' && <ModulesManager />}
                 {activeTab === 'instructors' && <InstructorsManager />}
+                {activeTab === 'leaves' && <LeaveRequestsManager />}
             </div>
         </div>
     );
