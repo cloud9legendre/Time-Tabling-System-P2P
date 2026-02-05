@@ -12,6 +12,15 @@ export interface Module {
     semester: number;
 }
 
+export interface Instructor {
+    id: string; // e.g. "inst-01"
+    name: string;
+    email: string;
+    department: string;
+    passwordHash: string;
+    passwordResetRequested?: number; // timestamp
+}
+
 export interface Booking {
     id: string;
     lab_id: string;
@@ -32,4 +41,4 @@ export interface UserProfile {
 }
 
 // Yjs Map keys
-export type SharedTypeKeys = 'labs' | 'modules' | 'bookings' | 'users';
+export type SharedTypeKeys = 'labs' | 'modules' | 'bookings' | 'users' | 'instructors';

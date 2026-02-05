@@ -16,6 +16,7 @@ export const TimetableGrid: React.FC = () => {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
+    const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
 
     // --- Helpers for Calendar Generation ---
     const daysInMonth = (date: Date) => {
@@ -51,7 +52,14 @@ export const TimetableGrid: React.FC = () => {
     };
 
     const handleDayClick = (dateStr: string) => {
+        setEditingBooking(null);
         setSelectedDate(dateStr);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (booking: Booking) => {
+        setEditingBooking(booking);
+        setSelectedDate(booking.date);
         setIsModalOpen(true);
     };
 
@@ -160,15 +168,28 @@ export const TimetableGrid: React.FC = () => {
                                                 <span className="font-bold text-blue-300 mr-1">{booking.start_time}</span>
                                                 <span className="truncate font-medium text-gray-300 flex-1">{booking.module_code}</span>
                                                 {isAdmin && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(booking.id);
-                                                        }}
-                                                        className="text-red-400 hover:text-red-200 opacity-0 group-hover/item:opacity-100 transition-opacity ml-1"
-                                                    >
-                                                        ✕
-                                                    </button>
+                                                    <div className="flex gap-1 ml-1 opacity-0 group-hover/item:opacity-100 transition-opacity flex-shrink-0">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEdit(booking);
+                                                            }}
+                                                            className="text-yellow-400 hover:text-yellow-200"
+                                                            title="Edit"
+                                                        >
+                                                            ✎
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(booking.id);
+                                                            }}
+                                                            className="text-red-400 hover:text-red-200"
+                                                            title="Delete"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -187,6 +208,7 @@ export const TimetableGrid: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 initialDate={selectedDate}
+                bookingToEdit={editingBooking}
             />
         </div>
     );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useYjs } from '../hooks/useYjs';
-import type { Lab, Module, Booking, UserProfile } from '../types/schema';
+import type { Lab, Module, Booking, UserProfile, Instructor } from '../types/schema';
 
 export const useUsers = () => {
     const { yDoc } = useYjs();
@@ -86,4 +86,24 @@ export const useBookings = () => {
     }, [yDoc]);
 
     return bookings;
+};
+
+export const useInstructors = () => {
+    const { yDoc } = useYjs();
+    const [instructors, setInstructors] = useState<Instructor[]>([]);
+
+    useEffect(() => {
+        const instructorsMap = yDoc.getMap<Instructor>('instructors');
+
+        const updateState = () => {
+            setInstructors(Array.from(instructorsMap.values()));
+        };
+
+        updateState();
+        instructorsMap.observe(() => {
+            updateState();
+        });
+    }, [yDoc]);
+
+    return instructors;
 };

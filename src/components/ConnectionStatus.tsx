@@ -10,7 +10,7 @@ interface OnlineUser {
 
 export const ConnectionStatus: React.FC = () => {
     const { connected, awareness, peerCount } = useYjs();
-    const { isAdmin, loginAsAdmin, user } = useAuth();
+    const { isAdmin, user } = useAuth();
     const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
     const [showOnlineList, setShowOnlineList] = useState(false);
 
@@ -86,18 +86,6 @@ export const ConnectionStatus: React.FC = () => {
                     </span>
                 </div>
 
-                {!isAdmin && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            loginAsAdmin();
-                        }}
-                        className="text-xs text-gray-500 hover:text-gray-300 underline"
-                        title="Switch to Admin Mode"
-                    >
-                        Admin
-                    </button>
-                )}
                 {isAdmin && (
                     <span className="text-xs text-yellow-500 font-bold border border-yellow-500/30 px-1.5 py-0.5 rounded">
                         ADMIN
