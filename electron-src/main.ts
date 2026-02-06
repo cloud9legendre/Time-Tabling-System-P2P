@@ -145,18 +145,18 @@ function createWindow(): void {
         show: false,
     });
 
-    if (app.isPackaged) {
-        mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    } else {
-        mainWindow.loadURL('http://localhost:5173');
-    }
+    const devServerUrl = 'http://localhost:5173';
+    mainWindow.loadURL(devServerUrl).catch(() => {
+        console.log('Dev server not available, loading production build...');
+        mainWindow?.loadFile(path.join(__dirname, '../dist/index.html'));
+    });
 
+    // Only open DevTools in development
     if (!app.isPackaged) {
         mainWindow.webContents.openDevTools();
     }
 
     mainWindow.once('ready-to-show', () => {
-        mainWindow?.maximize();
         mainWindow?.show();
         if (!tray) createTray();
     });
