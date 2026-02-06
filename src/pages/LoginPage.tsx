@@ -106,24 +106,93 @@ export const LoginPage: React.FC = () => {
         );
     }
 
+    const [setupStep, setSetupStep] = useState<'welcome' | 'create' | 'join'>('welcome');
+    const [inviteCode, setInviteCode] = useState('');
+
     // Setup Mode - No admin exists
     if (isSetupMode) {
+        // Step 1: Welcome / Choice Screen
+        if (setupStep === 'welcome') {
+            return (
+                <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
+                    <div className="bg-[#1a1a1a] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 text-center">
+                        <span className="text-4xl mb-4 block">👋</span>
+                        <h2 className="text-3xl font-bold text-white mb-2">Welcome to Lab P2P</h2>
+                        <p className="text-gray-400 mb-8">Get started by creating a new network or joining an existing one.</p>
+
+                        <div className="space-y-4">
+                            <button
+                                onClick={() => setSetupStep('create')}
+                                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-lg shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                            >
+                                <span>🆕</span> Create New Network
+                            </button>
+
+                            <div className="relative py-2">
+                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-700"></div></div>
+                                <div className="relative flex justify-center"><span className="bg-[#1a1a1a] px-3 text-gray-500 text-sm">OR</span></div>
+                            </div>
+
+                            <button
+                                onClick={() => setSetupStep('join')}
+                                className="w-full py-4 px-6 rounded-xl bg-[#2a2a2a] hover:bg-[#333] border border-gray-600 hover:border-gray-500 text-white font-semibold shadow hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                            >
+                                <span>🔗</span> Join Existing Network
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Step 2: Join Network Screen
+        if (setupStep === 'join') {
+            return (
+                <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
+                    <div className="bg-[#1a1a1a] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700">
+                        <button onClick={() => setSetupStep('welcome')} className="text-gray-500 hover:text-white mb-4 flex items-center gap-1">← Back</button>
+                        <h2 className="text-2xl font-bold text-white mb-2">Join Network</h2>
+                        <p className="text-gray-400 mb-6 text-sm">Ask your administrator for the Network Invite Code.</p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Invite Code</label>
+                                <input
+                                    type="text"
+                                    value={inviteCode}
+                                    onChange={(e) => setInviteCode(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-600 text-white font-mono focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="Paste code here..."
+                                    autoFocus
+                                />
+                            </div>
+                            <button
+                                onClick={() => joinNetwork && inviteCode && joinNetwork(inviteCode)}
+                                disabled={!inviteCode}
+                                className="w-full py-3 px-4 font-semibold rounded-lg shadow-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                Connect & Sync
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Step 3: Create Network (Admin Setup)
         return (
             <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
                 <div className="bg-[#1a1a1a] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-amber-700/50">
+                    <button onClick={() => setSetupStep('welcome')} className="text-gray-500 hover:text-white mb-4 flex items-center gap-1">← Back</button>
                     <div className="text-center mb-6">
                         <span className="text-4xl mb-2 block">🔐</span>
-                        <h2 className="text-3xl font-bold text-white tracking-tight">First Time Setup</h2>
-                        <p className="text-gray-400 mt-2">No administrator found. Create one to get started.</p>
+                        <h2 className="text-3xl font-bold text-white tracking-tight">Setup Administrator</h2>
+                        <p className="text-gray-400 mt-2">Create the first admin account for this new network.</p>
                     </div>
 
                     {syncWarning && (
                         <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3 mb-4">
                             <p className="text-yellow-400 text-sm font-medium">⚠️ No peers connected</p>
-                            <p className="text-yellow-500/80 text-xs mt-1">
-                                If another peer already created an admin while offline, creating one here may cause a conflict.
-                                Wait for peers to connect if you're unsure.
-                            </p>
                         </div>
                     )}
 
@@ -140,6 +209,7 @@ export const LoginPage: React.FC = () => {
                                 placeholder="Choose a strong password"
                                 required
                                 minLength={6}
+                                autoFocus
                             />
                         </div>
                         <div>
@@ -162,12 +232,12 @@ export const LoginPage: React.FC = () => {
                             type="submit"
                             className="w-full py-3 px-4 font-semibold rounded-lg shadow-lg bg-amber-600 hover:bg-amber-700 text-white hover:shadow-amber-500/30 transition-all duration-200 mt-2"
                         >
-                            Create Administrator
+                            Create Network & Login
                         </button>
 
-                        <p className="text-xs text-center text-gray-500 mt-4">
-                            This password will be used to login as the system administrator.
-                        </p>
+                        <div className="bg-amber-900/20 p-3 rounded text-xs text-amber-200/70 text-center mt-4">
+                            You will get an <strong>Invite Code</strong> to share with others after logging in.
+                        </div>
                     </form>
                 </div>
             </div>
