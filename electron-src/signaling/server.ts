@@ -40,13 +40,7 @@ export class SignalingServer {
                     const token = url.searchParams.get('token');
                     const remoteAddr = req.socket?.remoteAddress || '';
 
-                    // Allow localhost connections without token (for local multi-peer testing)
-                    // Also allow connections from same machine (::1, 127.0.0.1, ::ffff:127.0.0.1)
-                    const isLocalhost = remoteAddr === '::1' ||
-                        remoteAddr === '127.0.0.1' ||
-                        remoteAddr === '::ffff:127.0.0.1';
-
-                    if (!isLocalhost && token !== this.authSecret) {
+                    if (token !== this.authSecret) {
                         console.warn(`[SignalingServer] Auth failed from ${remoteAddr}`);
                         ws.close(1008, 'Unauthorized');
                         return;

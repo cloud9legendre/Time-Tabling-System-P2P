@@ -7,6 +7,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getSignalingInfo: () => ipcRenderer.invoke('get-signaling-info'),
     getPeerCount: () => ipcRenderer.invoke('get-peer-count'),
 
+    // Invite System
+    getInviteCode: () => ipcRenderer.invoke('get-invite-code'),
+    joinNetwork: (secret: string) => ipcRenderer.invoke('join-network', secret),
+    resetNetwork: () => ipcRenderer.invoke('reset-network'),
+
     // Event listeners (Multi-server mesh)
     onSignalingUrls: (callback: (urls: string[]) => void) => {
         ipcRenderer.on('signaling-urls', (_event, urls) => callback(urls));

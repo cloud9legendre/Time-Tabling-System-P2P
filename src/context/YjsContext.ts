@@ -11,6 +11,9 @@ export interface YjsContextType {
     awareness: Awareness | null;
     peerCount: number;
     signalingUrls: string[];
+    authToken?: string | null;  // This is the Invite Code
+    joinNetwork?: (code: string) => Promise<void>;
+    resetNetwork?: () => Promise<void>;
 }
 
 export const YjsContext = createContext<YjsContextType | null>(null);

@@ -14,6 +14,9 @@ declare global {
         electronAPI?: {
             onSignalingUrls: (callback: (urls: string[]) => void) => void;
             getSignalingInfo: () => Promise<{ urls: string[]; authToken?: string }>;
+            getInviteCode: () => Promise<string>;
+            joinNetwork: (secret: string) => Promise<void>;
+            resetNetwork: () => Promise<void>;
         }
     }
 }
@@ -156,8 +159,30 @@ export const YjsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
     }, [yDoc]);
 
+    const joinNetwork = async (code: string) => {
+        if (isElectron && window.electronAPI && window.electronAPI.joinNetwork) {
+            await window.electronAPI.joinNetwork(code);
+        }
+    };
+
+    const resetNetwork = async () => {
+        if (isElectron && window.electronAPI && window.electronAPI.resetNetwork) {
+            await window.electronAPI.resetNetwork();
+        }
+    };
+
     return (
-        <YjsContext.Provider value={{ yDoc, connected, provider, awareness, peerCount, signalingUrls }}>
+        <YjsContext.Provider value={{
+            yDoc,
+            connected,
+            provider,
+            awareness,
+            peerCount,
+            signalingUrls,
+            authToken,
+            joinNetwork,
+            resetNetwork
+        }}>
             {children}
         </YjsContext.Provider>
     );

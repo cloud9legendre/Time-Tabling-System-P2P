@@ -6,7 +6,7 @@ import type { Instructor } from '../types/schema';
 
 export const LoginPage: React.FC = () => {
     const { isAuthenticated, login, createFirstAdmin } = useAuth();
-    const { yDoc, connected, peerCount } = useYjs();
+    const { yDoc, connected, peerCount, authToken, joinNetwork, resetNetwork } = useYjs();
     const navigate = useNavigate();
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -224,6 +224,45 @@ export const LoginPage: React.FC = () => {
                         Use ID <strong>admin</strong> for system administration.
                     </p>
                 </form>
+
+                {/* Network Management Footer */}
+                <div className="mt-8 pt-6 border-t border-gray-700">
+                    <div className="flex flex-col gap-3">
+                        <div className="bg-[#2a2a2a] p-3 rounded text-xs break-all relative group">
+                            <span className="text-gray-500 uppercase font-bold text-[10px]">Current Network Invite Code</span>
+                            <p className="text-gray-300 font-mono mt-1 select-all">{authToken || 'Loading...'}</p>
+                            <button
+                                onClick={() => navigator.clipboard.writeText(authToken || '')}
+                                className="absolute top-2 right-2 text-blue-400 hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Copy"
+                            >
+                                Copy
+                            </button>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    const code = prompt('Enter Network Invite Code to Join:');
+                                    if (code && joinNetwork) joinNetwork(code);
+                                }}
+                                className="flex-1 py-2 px-3 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
+                            >
+                                🔗 Join Existing Network
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (confirm('Are you sure you want to create a NEW network? You will be disconnected from the current mesh.')) {
+                                        if (resetNetwork) resetNetwork();
+                                    }
+                                }}
+                                className="flex-1 py-2 px-3 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
+                            >
+                                🆕 Create New Network
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

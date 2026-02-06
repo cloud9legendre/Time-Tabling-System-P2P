@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { SignalingServer } from './signaling/server';
 import { MDNSService } from './discovery/mdns-service';
+import { ConfigManager } from './config-manager';
 
 
 
@@ -20,6 +21,7 @@ let mdnsService: MDNSService | null = null;
 let signalingUrls: string[] = [];
 let ownPort: number = 0;
 let authSecret: string = '';
+let configManager: ConfigManager;
 
 // Configuration
 const SERVICE_NAME = 'lab-timetable-p2p';
@@ -210,9 +212,10 @@ function getLocalIp(): string {
 async function initializeP2P(): Promise<void> {
     console.log('🚀 Initializing P2P Mesh Network...');
 
-    // Generate a secure auth secret for this session
-    authSecret = crypto.randomBytes(32).toString('hex');
-    console.log(`🔑 Generated auth secret for signaling server`);
+    // Initialize Config Manager
+    configManager = new ConfigManager();
+    authSecret = configManager.getNetworkSecret();
+    console.log(`🔑 Using persistent network secret (Invite Code): ${authSecret}`);
 
     // Step 1: Find available port and start own signaling server
     try {
@@ -255,6 +258,25 @@ ipcMain.handle('get-signaling-info', async () => {
         port: ownPort,
         authToken: authSecret
     };
+});
+
+ipcMain.handle('get-invite-code', async () => {
+    return authSecret;
+});
+
+ipcMain.handle('join-network', async (event, secret: string) => {
+    console.log('🔗 Joining network with secret:', secret);
+    configManager.setNetworkSecret(secret);
+    app.relaunch();
+    app.exit(0);
+});
+
+ipcMain.handle('reset-network', async () => {
+    console.log('🔄 Resetting network secret (Creating new network)...');
+    const newSecret = crypto.randomBytes(32).toString('hex');
+    configManager.setNetworkSecret(newSecret);
+    app.relaunch();
+    app.exit(0);
 });
 
 ipcMain.handle('get-peer-count', async () => {
