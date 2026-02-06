@@ -13,6 +13,9 @@
     "build:linux": "npm run build:electron && electron-builder --linux",
     "electron": "tsc -p electron-src/tsconfig.json && npx electron .",
     "test:p2p": "tsc -p electron-src/tsconfig.json && node scripts/test-p2p.cjs",
+    "peer:1": "tsc -p electron-src/tsconfig.json && npx electron . --user-data-dir=.test-peers/peer1",
+    "peer:2": "tsc -p electron-src/tsconfig.json && npx electron . --user-data-dir=.test-peers/peer2",
+    "peer:3": "tsc -p electron-src/tsconfig.json && npx electron . --user-data-dir=.test-peers/peer3",
     "lint": "eslint .",
     "preview": "vite preview"
   },
