@@ -13,7 +13,7 @@ declare global {
     interface Window {
         electronAPI?: {
             onSignalingUrls: (callback: (urls: string[]) => void) => void;
-            getSignalingInfo: () => Promise<{ urls: string[] }>;
+            getSignalingInfo: () => Promise<{ urls: string[]; authToken?: string }>;
         }
     }
 }
@@ -29,6 +29,7 @@ export const YjsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [provider, setProvider] = useState<WebrtcProvider | WebsocketProvider | null>(null);
     const [connected, setConnected] = useState(false);
     const [peerCount, setPeerCount] = useState(0);
+    const [authToken, setAuthToken] = useState<string | null>(null);
 
     const awareness = useMemo(() => provider?.awareness || null, [provider]);
 
@@ -44,14 +45,18 @@ export const YjsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             // Listen for URL updates
             window.electronAPI.onSignalingUrls((urls: string[]) => {
                 console.log('📡 Received signaling URLs from Electron:', urls);
+                // Token will be appended when creating provider
                 setSignalingUrls(urls);
             });
 
-            // Pull initial state
-            window.electronAPI.getSignalingInfo().then((info: { urls: string[] }) => {
+            // Pull initial state (includes auth token)
+            window.electronAPI.getSignalingInfo().then((info) => {
                 if (info.urls && info.urls.length > 0) {
-                    console.log('📡 Pulled signaling info from Electron:', info);
+                    console.log('📡 Pulled signaling info from Electron:', info.urls.length, 'servers');
                     setSignalingUrls(info.urls);
+                    if (info.authToken) {
+                        setAuthToken(info.authToken);
+                    }
                 }
             });
         }
@@ -60,15 +65,25 @@ export const YjsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Create provider when signaling URLs change
     useEffect(() => {
         if (signalingUrls.length === 0) return;
+        // In Electron mode, wait for auth token
+        if (isElectron && !authToken) {
+            console.log('⏳ Waiting for auth token before connecting...');
+            return;
+        }
 
-        console.log('🔄 Creating provider with signaling URLs:', signalingUrls);
+        // Append auth token to signaling URLs for Electron mode
+        const authenticatedUrls = isElectron && authToken
+            ? signalingUrls.map(url => `${url}?token=${authToken}`)
+            : signalingUrls;
+
+        console.log('🔄 Creating provider with signaling URLs:', authenticatedUrls.length, 'servers');
 
         let syncProvider: WebrtcProvider | WebsocketProvider;
 
         if (isElectron) {
-            console.log('🖥️ Running in Electron mode with', signalingUrls.length, 'signaling servers');
+            console.log('🖥️ Running in Electron mode with', authenticatedUrls.length, 'signaling servers');
             syncProvider = new WebrtcProvider('lab-timetable-mesh', yDoc, {
-                signaling: signalingUrls
+                signaling: authenticatedUrls
             });
 
             syncProvider.on('status', (event: { connected: boolean }) => {
@@ -96,7 +111,7 @@ export const YjsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             console.log('🔌 YjsProvider: Cleaning up provider...');
             syncProvider.destroy();
         };
-    }, [yDoc, signalingUrls]);
+    }, [yDoc, signalingUrls, authToken]);
 
     // Handle Peer Count using derived awareness
     useEffect(() => {
