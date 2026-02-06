@@ -69,10 +69,37 @@
     "url": "git+https://github.com/cloud9legendre/Time-Tabling-System-P2P.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lab P2P Team",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cloud9legendre/Time-Tabling-System-P2P/issues"
   },
-  "homepage": "https://github.com/cloud9legendre/Time-Tabling-System-P2P#readme"
+  "homepage": "https://github.com/cloud9legendre/Time-Tabling-System-P2P#readme",
+  "build": {
+    "appId": "com.lab.timetable.p2p",
+    "productName": "Lab Timetable P2P",
+    "copyright": "Copyright © 2024 Lab P2P",
+    "cscLink": "cert.pfx",
+    "cscKeyPassword": "lab-secure-password",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Lab Timetable",
+      "deleteAppDataOnUninstall": true
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "electron-src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  }
 }
