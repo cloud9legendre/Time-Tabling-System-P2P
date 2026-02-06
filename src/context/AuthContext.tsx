@@ -12,10 +12,10 @@ const STORAGE_KEY = 'lab_p2p_identity';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { yDoc, awareness } = useYjs();
 
-    // Lazy initialization from localStorage
+    // Lazy initialization from sessionStorage (Only persists for current session/window)
     const [user, setUser] = useState<UserProfile | null>(() => {
         try {
-            const storedIdentity = localStorage.getItem(STORAGE_KEY);
+            const storedIdentity = sessionStorage.getItem(STORAGE_KEY);
             return storedIdentity ? JSON.parse(storedIdentity) : null;
         } catch (e) {
             console.error('Failed to parse identity:', e);
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'ADMIN',
         };
 
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...adminUser, _secret: secretKeyProp }));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...adminUser, _secret: secretKeyProp }));
         setUser(adminUser);
         return true;
     };
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'INSTRUCTOR',
         };
 
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userProfile));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(userProfile));
         setUser(userProfile);
         return true;
     };
@@ -145,10 +145,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     };
 
-    const logout = () => {
-        localStorage.removeItem(STORAGE_KEY);
+    const logout = useCallback(() => {
+        sessionStorage.removeItem(STORAGE_KEY);
         setUser(null);
-    };
+    }, []);
+
+    // Idle Timeout Logic (15 Minutes)
+    useEffect(() => {
+        if (!user) return;
+
+        const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+        let timeoutId: ReturnType<typeof setTimeout>;
+
+        const handleActivity = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                console.log('Session timed out due to inactivity.');
+                logout();
+            }, IDLE_TIMEOUT);
+        };
+
+        // Events to track activity
+        const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+
+        // Initial start
+        handleActivity();
+
+        // Attach listeners
+        events.forEach(event => window.addEventListener(event, handleActivity));
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            events.forEach(event => window.removeEventListener(event, handleActivity));
+        };
+    }, [user, logout]);
 
     const register = (name: string) => {
         // 1. Generate KeyPair
@@ -164,8 +194,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'INSTRUCTOR', // Default role
         };
 
-        // 3. Save to Local Storage
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...newUser, _secret: secretKeyProp }));
+        // 3. Save to Session Storage
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...newUser, _secret: secretKeyProp }));
 
         // 4. Update State
         setUser(newUser);

@@ -28,6 +28,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     const [selectedLab, setSelectedLab] = useState('');
     const [selectedModule, setSelectedModule] = useState('');
     const [selectedInstructor, setSelectedInstructor] = useState('');
+    const [practicalName, setPracticalName] = useState('');
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('10:00');
     const [isWeekly, setIsWeekly] = useState(false);
@@ -41,6 +42,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 setSelectedLab(bookingToEdit.lab_id);
                 setSelectedModule(bookingToEdit.module_code);
                 setSelectedInstructor(bookingToEdit.instructor || '');
+                setPracticalName(bookingToEdit.practical_name || '');
                 setStartTime(bookingToEdit.start_time);
                 setEndTime(bookingToEdit.end_time);
                 setIsWeekly(false); // Default to false for editing single instance
@@ -50,6 +52,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 setSelectedLab('');
                 setSelectedModule('');
                 setSelectedInstructor('');
+                setPracticalName('');
                 setStartTime('09:00');
                 setEndTime('10:00');
                 setIsWeekly(false);
@@ -70,7 +73,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         start_time: startTime,
         end_time: endTime,
         timestamp: Date.now(),
+
         instructor: selectedInstructor || undefined,
+        practical_name: practicalName || undefined,
     });
 
     const validateBooking = (labId: string, instructor: string, date: string, start: string, end: string, excludeBookingId?: string): string | null => {
@@ -213,6 +218,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                         </select>
                     </div>
 
+
+
+                    {/* Practical Name (Optional) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1">Session Name <span className="text-gray-500 text-xs">(Optional)</span></label>
+                        <input
+                            type="text"
+                            value={practicalName}
+                            onChange={(e) => setPracticalName(e.target.value)}
+                            placeholder="e.g. Lab 01 - Intro to Programming"
+                            className="w-full px-3 py-2 bg-[#2a2a2a] border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 placeholder-gray-500"
+                        />
+                    </div>
+
                     {/* Instructor Selection */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Instructor</label>
@@ -299,7 +318,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };

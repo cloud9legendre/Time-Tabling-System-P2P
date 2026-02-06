@@ -19,6 +19,7 @@ export interface Instructor {
     department: string;
     passwordHash: string;
     passwordResetRequested?: number; // timestamp
+    color?: string; // Assigned color for timetable
 }
 
 export interface Booking {
@@ -31,6 +32,7 @@ export interface Booking {
     end_time: string; // "HH:mm"
     timestamp: number;
     instructor?: string; // Name or ID of the responsible instructor
+    practical_name?: string; // Optional name for the session (e.g. "Lab 1")
 }
 
 export interface UserProfile {

@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useLeaves } from '../../hooks/useSharedState';
 import { useLeaveActions } from '../../hooks/useLeaveActions';
-import { CalendarDays, Plus } from 'lucide-react';
+import { CalendarDays, Plus, X } from 'lucide-react';
 
-export const LeaveRequestPanel: React.FC = () => {
+interface LeaveRequestPanelProps {
+    onClose?: () => void;
+}
+
+export const LeaveRequestPanel: React.FC<LeaveRequestPanelProps> = ({ onClose }) => {
     const { user } = useAuth();
     const leaves = useLeaves();
     const { requestLeave } = useLeaveActions();
@@ -57,17 +61,28 @@ export const LeaveRequestPanel: React.FC = () => {
     };
 
     return (
-        <div className="bg-[#1a1a1a] rounded-xl border border-gray-800 shadow-xl overflow-hidden mt-6">
+        <div className="bg-[#1a1a1a] rounded-xl border border-gray-800 shadow-xl overflow-hidden">
             <div className="p-6 border-b border-gray-800 flex justify-between items-center">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                     <CalendarDays className="text-blue-400" /> My Leave Requests
                 </h3>
-                <button
-                    onClick={() => setIsFormOpen(!isFormOpen)}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
-                >
-                    <Plus size={16} /> New Request
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+                    >
+                        <Plus size={16} /> New Request
+                    </button>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                            title="Close"
+                        >
+                            <X size={20} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {isFormOpen && (

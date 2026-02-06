@@ -5,6 +5,19 @@ import type { Instructor } from '../../types/schema';
 import { Plus, Trash2, Edit2, X, User, AlertCircle } from 'lucide-react';
 import { hashPassword } from '../../utils/crypto';
 
+const INSTRUCTOR_COLORS = [
+    '#3b82f6', // Blue 500
+    '#22c55e', // Green 500
+    '#a855f7', // Purple 500
+    '#f97316', // Orange 500
+    '#ec4899', // Pink 500
+    '#14b8a6', // Teal 500
+    '#6366f1', // Indigo 500
+    '#06b6d4', // Cyan 500
+    '#eab308', // Yellow 500
+    '#f43f5e', // Rose 500
+];
+
 export const InstructorsManager: React.FC = () => {
     const instructors = useInstructors();
     const { addInstructor, updateInstructor, deleteInstructor } = useAdminActions();
@@ -65,6 +78,9 @@ export const InstructorsManager: React.FC = () => {
                     setError('Initial password is required.');
                     return;
                 }
+
+                // Assign random color
+                instructorData.color = INSTRUCTOR_COLORS[Math.floor(Math.random() * INSTRUCTOR_COLORS.length)];
                 await addInstructor(instructorData, formData.password);
             }
             setIsModalOpen(false);

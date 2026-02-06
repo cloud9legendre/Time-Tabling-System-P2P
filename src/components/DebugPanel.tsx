@@ -55,7 +55,7 @@ export const DebugPanel: React.FC = () => {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-20 right-4 px-3 py-1.5 bg-gray-900 text-gray-400 text-xs rounded border border-gray-700 hover:bg-gray-800 hover:text-gray-200 transition-colors z-40"
+                className="fixed bottom-20 right-4 px-3 py-1.5 bg-gray-900 text-gray-400 text-xs rounded border border-gray-700 hover:bg-gray-800 hover:text-gray-200 transition-colors z-[9999]"
             >
                 🔧 Debug
             </button>
@@ -63,7 +63,7 @@ export const DebugPanel: React.FC = () => {
     }
 
     return (
-        <div className="fixed bottom-20 right-4 w-96 max-h-[600px] bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden z-40">
+        <div className="fixed bottom-20 right-4 w-96 max-h-[600px] bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden z-[9999]">
             {/* Header */}
             <div className="p-3 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                 <h3 className="text-sm font-bold text-gray-200">🔧 Debug Panel (Mesh)</h3>
