@@ -6,15 +6,25 @@ import { LeaveRequestsManager } from './LeaveRequestsManager';
 import { useAuth } from '../../hooks/useAuth';
 import { useYjs } from '../../hooks/useYjs';
 import { useLeaves } from '../../hooks/useSharedState';
-import { ShieldAlert, Bell } from 'lucide-react';
+import { ShieldAlert, Bell, Copy, Check, Eye, EyeOff } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
     const { isAdmin, user } = useAuth();
     const { authToken } = useYjs();
     const leaves = useLeaves();
     const [activeTab, setActiveTab] = useState<'labs' | 'modules' | 'instructors' | 'leaves'>('labs');
+    const [copied, setCopied] = useState(false);
+    const [showCode, setShowCode] = useState(false);
 
     const pendingLeavesCount = leaves.filter(l => l.status === 'PENDING').length;
+
+    const handleCopy = () => {
+        if (authToken) {
+            navigator.clipboard.writeText(authToken);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     if (!isAdmin) {
         return (
@@ -31,34 +41,43 @@ export const AdminDashboard: React.FC = () => {
 
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold text-white mb-8 border-b border-gray-700 pb-4 flex items-center gap-4">
-                Admin Management Dashboard
-                {pendingLeavesCount > 0 && (
-                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 px-3 py-1 rounded-full animate-pulse">
-                        <Bell size={16} className="text-red-400" />
-                        <span className="text-sm font-bold text-red-400">{pendingLeavesCount} New Requests</span>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-gray-700 pb-4 gap-4">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-3xl font-bold text-white">
+                        Admin Dashboard
+                    </h1>
+                    {pendingLeavesCount > 0 && (
+                        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 px-3 py-1 rounded-full animate-pulse">
+                            <Bell size={16} className="text-red-400" />
+                            <span className="text-sm font-bold text-red-400">{pendingLeavesCount} New</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sleek Invite Code Widget */}
+                {authToken && (
+                    <div className="flex items-center gap-3 px-4 py-2 bg-[#1a1a1a] rounded-full border border-gray-700 hover:border-gray-600 transition-all shadow-sm group">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Invite Code</span>
+
+                        <div className="h-4 w-[1px] bg-gray-700 mx-1"></div>
+
+                        <code className="font-mono text-sm text-blue-400 min-w-[120px] text-center">
+                            {showCode ? authToken : '••••••••••••••••••••'}
+                        </code>
+
+                        <button onClick={() => setShowCode(!showCode)} className="text-gray-500 hover:text-white transition-colors p-1">
+                            {showCode ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+
+                        <button
+                            onClick={handleCopy}
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-medium transition-colors ml-1 border border-blue-500/20"
+                        >
+                            {copied ? <Check size={12} /> : <Copy size={12} />}
+                            <span>{copied ? 'Copied' : 'Copy Key'}</span>
+                        </button>
                     </div>
                 )}
-            </h1>
-
-            {/* Network Invite Code (Admin Only) */}
-            <div className="bg-[#1e1e1e] border border-gray-700 rounded-lg p-4 mb-8 flex items-center justify-between">
-                <div>
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Network Invite Code</h3>
-                    <p className="text-xs text-gray-500">Share this code with other instructors so they can join this network.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <code className="bg-black/50 px-4 py-2 rounded text-blue-400 font-mono text-sm border border-gray-800 select-all">
-                        {authToken || 'Loading...'}
-                    </code>
-                    <button
-                        onClick={() => navigator.clipboard.writeText(authToken || '')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                        title="Copy to Clipboard"
-                    >
-                        📋
-                    </button>
-                </div>
             </div>
 
             {/* Sub-navigation */}
