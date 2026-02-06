@@ -4,7 +4,6 @@ import * as naclUtil from 'tweetnacl-util';
 import { useYjs } from '../hooks/useYjs';
 import type { UserProfile, Instructor } from '../types/schema';
 import { AuthContext } from './AuthContextDefinition';
-import { ADMIN_KEYS } from '../utils/constants';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 
 const STORAGE_KEY = 'lab_p2p_identity';
@@ -43,37 +42,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [awareness, publishUserToYjs, user]);
 
-    // Private helper for internal use if needed, but logic moved to login
-    const _loginAsAdmin = (password: string) => {
-        if (password !== 'admin123') return false;
+    // Check if an admin exists (for UI "Setup" flow)
+    const createFirstAdmin = async (password: string): Promise<boolean> => {
+        const instructorsMap = yDoc.getMap<Instructor>('instructors');
 
-        const secretKeyProp = ADMIN_KEYS.SECRET;
-        const publicKeyProp = ADMIN_KEYS.PUBLIC;
+        if (instructorsMap.has('admin')) {
+            console.warn('Admin already exists');
+            return false;
+        }
 
-        const adminUser: UserProfile = {
-            publicKey: publicKeyProp,
+        const newHash = await hashPassword(password);
+        const adminUser: Instructor = {
+            id: 'admin',
             name: 'System Admin',
             email: 'admin@p2p.lab',
-            role: 'ADMIN',
+            department: 'System',
+            passwordHash: newHash,
+            color: '#dc2626' // Red
         };
 
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...adminUser, _secret: secretKeyProp }));
-        setUser(adminUser);
+        yDoc.transact(() => {
+            instructorsMap.set('admin', adminUser);
+        });
+
         return true;
     };
 
     const login = async (id: string, password: string): Promise<boolean> => {
-        // 1. Check for Admin
-        if (id === 'admin') {
-            return _loginAsAdmin(password);
-        }
-
-        // 2. Check Instructors
         const instructorsMap = yDoc.getMap<Instructor>('instructors');
         const instructor = instructorsMap.get(id);
 
         if (!instructor) {
-            console.warn('Instructor not found');
+            console.warn('User not found');
             return false;
         }
 
@@ -85,11 +85,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Login successful
+        const role = instructor.id === 'admin' ? 'ADMIN' : 'INSTRUCTOR';
+
         const userProfile: UserProfile = {
             publicKey: instructor.id, // Using ID as public key identifier
             name: instructor.name,
             email: instructor.email,
-            role: 'INSTRUCTOR',
+            role: role,
         };
 
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(userProfile));
@@ -209,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logout,
             changePassword,
             requestPasswordReset,
+            createFirstAdmin,
             isAuthenticated: !!user,
             isAdmin: user?.role === 'ADMIN'
         }}>

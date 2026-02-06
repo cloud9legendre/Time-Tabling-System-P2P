@@ -15,7 +15,4 @@ export const DEFAULT_MODULES: Module[] = [
     { code: 'NET101', title: 'Networking Fundamentals', semester: 1 },
 ];
 
-export const ADMIN_KEYS = {
-    PUBLIC: 'UieoZ56N+QEtF4MEHFMLVanCgSw4B8GzK7hCbYrAxXs=',
-    SECRET: 'HWJ2EkSu5YqJBqIN3zjp79L+X844DxtzvJp1AISin1RSJ6hnno35AS0XgwQcUwtVqcKBLDgHwbMruEJtisDFew=='
-};
+

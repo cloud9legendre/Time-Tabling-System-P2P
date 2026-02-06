@@ -10,6 +10,7 @@ export interface AuthContextType {
     isAdmin: boolean;
     changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     requestPasswordReset: () => Promise<void>;
+    createFirstAdmin: (password: string) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import * as crypto from 'crypto';
 
 interface SignalingMessage {
     type: string;
@@ -16,9 +17,11 @@ export class SignalingServer {
     private wss: WebSocketServer | null = null;
     private clients: Map<string, WebSocket> = new Map();
     private port: number;
+    private authSecret: string;
 
-    constructor(port: number) {
+    constructor(port: number, authSecret: string) {
         this.port = port;
+        this.authSecret = authSecret;
     }
 
     async start(): Promise<void> {
@@ -31,7 +34,17 @@ export class SignalingServer {
                     resolve();
                 });
 
-                this.wss.on('connection', (ws: WebSocket) => {
+                this.wss.on('connection', (ws: WebSocket, req: any) => {
+                    // URL-based Authentication
+                    const url = new URL(req.url || '', `http://localhost:${this.port}`);
+                    const token = url.searchParams.get('token');
+
+                    if (token !== this.authSecret) {
+                        console.warn(`[SignalingServer] Auth failed from ${req.socket?.remoteAddress}`);
+                        ws.close(1008, 'Unauthorized');
+                        return;
+                    }
+
                     const clientId = this.generateClientId();
                     this.clients.set(clientId, ws);
                     console.log(`[SignalingServer] Client connected: ${clientId}`);
@@ -51,8 +64,6 @@ export class SignalingServer {
                     ws.on('close', () => {
                         this.clients.delete(clientId);
                         console.log(`[SignalingServer] Client disconnected: ${clientId}`);
-
-                        // Notify other clients
                         this.broadcast({ type: 'peer-left', clientId }, clientId);
                     });
 
@@ -102,7 +113,7 @@ export class SignalingServer {
     }
 
     private generateClientId(): string {
-        return `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        return `client-${crypto.randomUUID()}`;
     }
 
     getPeerCount(): number {

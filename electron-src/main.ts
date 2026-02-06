@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron';
 import * as path from 'path';
 import * as net from 'net';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { SignalingServer } from './signaling/server';
 import { MDNSService } from './discovery/mdns-service';
 
@@ -18,14 +19,15 @@ let mdnsService: MDNSService | null = null;
 // Mesh architecture: all discovered signaling URLs (including own)
 let signalingUrls: string[] = [];
 let ownPort: number = 0;
+let authSecret: string = '';
 
 // Configuration
 const SERVICE_NAME = 'lab-timetable-p2p';
 const PORT_RANGE_START = 5000;
 const PORT_RANGE_END = 5999;
 
-// Generate unique instance ID for mDNS
-const instanceId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+// Generate unique instance ID for mDNS (using crypto for security)
+const instanceId = crypto.randomUUID();
 
 /**
  * Find an available port in the specified range
@@ -208,12 +210,16 @@ function getLocalIp(): string {
 async function initializeP2P(): Promise<void> {
     console.log('🚀 Initializing P2P Mesh Network...');
 
+    // Generate a secure auth secret for this session
+    authSecret = crypto.randomBytes(32).toString('hex');
+    console.log(`🔑 Generated auth secret for signaling server`);
+
     // Step 1: Find available port and start own signaling server
     try {
         ownPort = await findAvailablePort();
         console.log(`🔌 Found available port: ${ownPort}`);
 
-        signalingServer = new SignalingServer(ownPort);
+        signalingServer = new SignalingServer(ownPort, authSecret);
         await signalingServer.start();
         console.log(`✅ Own signaling server started on port ${ownPort}`);
     } catch (err) {
@@ -246,7 +252,8 @@ async function initializeP2P(): Promise<void> {
 ipcMain.handle('get-signaling-info', async () => {
     return {
         urls: signalingUrls,
-        port: ownPort
+        port: ownPort,
+        authToken: authSecret
     };
 });
 
