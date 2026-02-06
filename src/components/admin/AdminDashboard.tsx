@@ -61,9 +61,9 @@ export const AdminDashboard: React.FC = () => {
 
                         <div className="h-4 w-[1px] bg-gray-700 mx-1"></div>
 
-                        <code className="font-mono text-sm text-blue-400 min-w-[120px] text-center">
+                        <div className="font-mono text-sm text-blue-400 max-w-[200px] overflow-x-auto whitespace-nowrap scrollbar-hide text-center px-1">
                             {showCode ? authToken : '••••••••••••••••••••'}
-                        </code>
+                        </div>
 
                         <button onClick={() => setShowCode(!showCode)} className="text-gray-500 hover:text-white transition-colors p-1">
                             {showCode ? <EyeOff size={14} /> : <Eye size={14} />}
