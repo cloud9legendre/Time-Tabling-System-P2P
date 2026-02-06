@@ -13,7 +13,6 @@ export const LoginPage: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isSetupMode, setIsSetupMode] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [syncWarning, setSyncWarning] = useState(false);
 
     // Setup Flow State
@@ -28,7 +27,6 @@ export const LoginPage: React.FC = () => {
             const instructorsMap = yDoc.getMap<Instructor>('instructors');
             const adminExists = instructorsMap.has('admin');
             setIsSetupMode(!adminExists);
-            setIsLoading(false);
 
             // Warn if no admin and no peers connected (potential split-brain)
             if (!adminExists && peerCount === 0) {
@@ -97,13 +95,34 @@ export const LoginPage: React.FC = () => {
         }
     };
 
-    if (isLoading || !connected) {
+    // Debounce connection status to prevent flickering
+    const [showConnectionScreen, setShowConnectionScreen] = useState(true);
+
+    useEffect(() => {
+        let timeout: ReturnType<typeof setTimeout>;
+
+        if (connected) {
+            setShowConnectionScreen(false);
+        } else {
+            // Only show connection screen if disconnected for more than 1s
+            timeout = setTimeout(() => {
+                setShowConnectionScreen(true);
+            }, 1000);
+        }
+
+        return () => clearTimeout(timeout);
+    }, [connected]);
+
+    if (showConnectionScreen) {
         return (
             <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
                 <div className="bg-[#1a1a1a] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 text-center">
                     <div className="animate-pulse">
                         <h2 className="text-2xl font-bold mb-4 text-white">Connecting to P2P Network...</h2>
                         <p className="text-gray-400">Please wait while we sync with the mesh network.</p>
+                        <div className="mt-4 flex justify-center">
+                            <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
                     </div>
                 </div>
             </div>
