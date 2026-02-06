@@ -4,11 +4,13 @@ import { ModulesManager } from './ModulesManager';
 import { InstructorsManager } from './InstructorsManager';
 import { LeaveRequestsManager } from './LeaveRequestsManager';
 import { useAuth } from '../../hooks/useAuth';
+import { useYjs } from '../../hooks/useYjs';
 import { useLeaves } from '../../hooks/useSharedState';
 import { ShieldAlert, Bell } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
     const { isAdmin, user } = useAuth();
+    const { authToken } = useYjs();
     const leaves = useLeaves();
     const [activeTab, setActiveTab] = useState<'labs' | 'modules' | 'instructors' | 'leaves'>('labs');
 
@@ -38,6 +40,26 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                 )}
             </h1>
+
+            {/* Network Invite Code (Admin Only) */}
+            <div className="bg-[#1e1e1e] border border-gray-700 rounded-lg p-4 mb-8 flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Network Invite Code</h3>
+                    <p className="text-xs text-gray-500">Share this code with other instructors so they can join this network.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <code className="bg-black/50 px-4 py-2 rounded text-blue-400 font-mono text-sm border border-gray-800 select-all">
+                        {authToken || 'Loading...'}
+                    </code>
+                    <button
+                        onClick={() => navigator.clipboard.writeText(authToken || '')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                        title="Copy to Clipboard"
+                    >
+                        📋
+                    </button>
+                </div>
+            </div>
 
             {/* Sub-navigation */}
             <div className="flex space-x-4 mb-8">
