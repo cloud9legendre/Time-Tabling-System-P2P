@@ -6,7 +6,7 @@ import type { Instructor } from '../types/schema';
 
 export const LoginPage: React.FC = () => {
     const { isAuthenticated, login, createFirstAdmin } = useAuth();
-    const { yDoc, connected } = useYjs();
+    const { yDoc, connected, peerCount } = useYjs();
     const navigate = useNavigate();
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -14,6 +14,7 @@ export const LoginPage: React.FC = () => {
     const [error, setError] = useState('');
     const [isSetupMode, setIsSetupMode] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [syncWarning, setSyncWarning] = useState(false);
 
     // Check if admin exists
     useEffect(() => {
@@ -24,6 +25,13 @@ export const LoginPage: React.FC = () => {
             const adminExists = instructorsMap.has('admin');
             setIsSetupMode(!adminExists);
             setIsLoading(false);
+
+            // Warn if no admin and no peers connected (potential split-brain)
+            if (!adminExists && peerCount === 0) {
+                setSyncWarning(true);
+            } else {
+                setSyncWarning(false);
+            }
         };
 
         // Initial check
@@ -36,7 +44,7 @@ export const LoginPage: React.FC = () => {
         return () => {
             instructorsMap.unobserve(checkAdmin);
         };
-    }, [yDoc, connected]);
+    }, [yDoc, connected, peerCount]);
 
     // If already authenticated, redirect
     useEffect(() => {
@@ -108,6 +116,16 @@ export const LoginPage: React.FC = () => {
                         <h2 className="text-3xl font-bold text-white tracking-tight">First Time Setup</h2>
                         <p className="text-gray-400 mt-2">No administrator found. Create one to get started.</p>
                     </div>
+
+                    {syncWarning && (
+                        <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3 mb-4">
+                            <p className="text-yellow-400 text-sm font-medium">⚠️ No peers connected</p>
+                            <p className="text-yellow-500/80 text-xs mt-1">
+                                If another peer already created an admin while offline, creating one here may cause a conflict.
+                                Wait for peers to connect if you're unsure.
+                            </p>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSetupAdmin} className="space-y-4">
                         <div>
