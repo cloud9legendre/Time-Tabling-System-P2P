@@ -16,6 +16,10 @@ export const LoginPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [syncWarning, setSyncWarning] = useState(false);
 
+    // Setup Flow State
+    const [setupStep, setSetupStep] = useState<'welcome' | 'create' | 'join'>('welcome');
+    const [inviteCode, setInviteCode] = useState('');
+
     // Check if admin exists
     useEffect(() => {
         if (!connected) return;
@@ -106,8 +110,7 @@ export const LoginPage: React.FC = () => {
         );
     }
 
-    const [setupStep, setSetupStep] = useState<'welcome' | 'create' | 'join'>('welcome');
-    const [inviteCode, setInviteCode] = useState('');
+
 
     // Setup Mode - No admin exists
     if (isSetupMode) {
